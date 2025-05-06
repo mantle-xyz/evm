@@ -17,8 +17,8 @@ use alloy_evm::{
 use alloy_op_hardforks::{OpChainHardforks, OpHardforks};
 use alloy_primitives::{Bytes, B256};
 use canyon::ensure_create2_deployer;
+use mantle_revm::transaction::deposit::DEPOSIT_TRANSACTION_TYPE;
 use op_alloy_consensus::OpDepositReceipt;
-use op_revm::transaction::deposit::DEPOSIT_TRANSACTION_TYPE;
 pub use receipt_builder::OpAlloyReceiptBuilder;
 use receipt_builder::OpReceiptBuilder;
 use revm::{context::result::ResultAndState, database::State, DatabaseCommit, Inspector};
@@ -160,10 +160,11 @@ where
         f(&result);
 
         let gas_used = result.gas_used();
-
+        let _token_ratio = self.evm.token_ratio();
         // append gas used
         self.gas_used += gas_used;
 
+        // [TODO]: token ratio should be added to the receipt,but not deposit receipt
         self.receipts.push(
             match self.receipt_builder.build_receipt(ReceiptBuilderCtx {
                 tx: tx.tx(),
@@ -193,6 +194,7 @@ where
                         deposit_receipt_version: (is_deposit
                             && self.spec.is_canyon_active_at_timestamp(self.evm.block().timestamp))
                         .then_some(1),
+                        token_ratio: None,
                     })
                 }
             },

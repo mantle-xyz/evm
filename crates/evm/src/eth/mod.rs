@@ -212,6 +212,10 @@ where
     fn inspector_mut(&mut self) -> &mut Self::Inspector {
         &mut self.inner.inspector
     }
+    
+    fn token_ratio(&self) -> U256 {
+        U256::ZERO
+    }
 }
 
 /// Factory producing [`EthEvm`].

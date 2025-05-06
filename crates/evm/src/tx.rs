@@ -353,7 +353,7 @@ mod op {
     use alloy_eips::{Encodable2718, Typed2718};
     use alloy_primitives::{Address, Bytes};
     use op_alloy_consensus::{OpTxEnvelope, TxDeposit};
-    use op_revm::{transaction::deposit::DepositTransactionParts, OpTransaction};
+    use mantle_revm::{transaction::deposit::DepositTransactionParts, OpTransaction};
     use revm::context::TxEnv;
 
     impl FromTxWithEncoded<OpTxEnvelope> for OpTransaction<TxEnv> {
@@ -373,6 +373,8 @@ mod op {
                         from: _,
                         mint: _,
                         is_system_transaction: _,
+                        eth_tx_value: _,
+                        eth_value: _,
                     } = tx.inner();
                     TxEnv {
                         tx_type: tx.ty(),
@@ -391,6 +393,8 @@ mod op {
                     source_hash: tx.source_hash,
                     mint: tx.mint,
                     is_system_transaction: tx.is_system_transaction,
+                    eth_tx_value: tx.eth_tx_value,
+                    eth_value: tx.eth_value,
                 }
             } else {
                 Default::default()

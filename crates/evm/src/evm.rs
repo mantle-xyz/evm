@@ -1,7 +1,7 @@
 //! Abstraction over EVM.
 
 use crate::{EvmEnv, EvmError, IntoTxEnv};
-use alloy_primitives::{Address, Bytes};
+use alloy_primitives::{Address, Bytes, U256};
 use core::{error::Error, fmt::Debug};
 use revm::{
     context::{result::ExecutionResult, BlockEnv},
@@ -142,6 +142,9 @@ pub trait Evm {
 
     /// Mutable getter of inspector.
     fn inspector_mut(&mut self) -> &mut Self::Inspector;
+    
+    /// Returns the token ratio of the chain.
+    fn token_ratio(&self) -> U256;
 }
 
 /// A type responsible for creating instances of an ethereum virtual machine given a certain input.

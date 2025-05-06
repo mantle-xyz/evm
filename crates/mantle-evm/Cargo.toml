@@ -1,6 +1,6 @@
 [package]
-name = "alloy-op-evm"
-description = "OP EVM implementation"
+name = "alloy-mantle-evm"
+description = "Mantle EVM implementation"
 
 version.workspace = true
 edition.workspace = true
@@ -24,7 +24,7 @@ alloy-op-hardforks.workspace = true
 op-alloy-consensus.workspace = true
 
 revm.workspace = true
-op-revm.workspace = true
+mantle-revm.workspace = true
 
 auto_impl.workspace = true
 
@@ -34,7 +34,7 @@ std = [
 	"alloy-primitives/std",
 	"revm/std",
 	"alloy-evm/std",
-	"op-revm/std",
+	"mantle-revm/std",
 	"alloy-consensus/std",
 	"alloy-eips/std",
 	"op-alloy-consensus/std"

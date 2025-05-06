@@ -16,11 +16,11 @@ use core::{
     fmt::Debug,
     ops::{Deref, DerefMut},
 };
-use op_alloy_consensus::OpTxType;
-use op_revm::{
+use mantle_revm::{
     precompiles::OpPrecompiles, DefaultOp, OpBuilder, OpContext, OpHaltReason, OpSpecId,
     OpTransaction, OpTransactionError,
 };
+use op_alloy_consensus::OpTxType;
 use revm::{
     context::{BlockEnv, TxEnv},
     context_interface::result::{EVMError, ResultAndState},
@@ -37,10 +37,10 @@ pub use block::{OpBlockExecutionCtx, OpBlockExecutor, OpBlockExecutorFactory};
 ///
 /// This is a wrapper type around the `revm` evm with optional [`Inspector`] (tracing)
 /// support. [`Inspector`] support is configurable at runtime because it's part of the underlying
-/// [`OpEvm`](op_revm::OpEvm) type.
+/// [`OpEvm`] mantle_revm::OpEvm) type.
 #[allow(missing_debug_implementations)] // missing revm::OpContext Debug impl
 pub struct OpEvm<DB: Database, I, P = OpPrecompiles> {
-    inner: op_revm::OpEvm<OpContext<DB>, I, EthInstructions<EthInterpreter, OpContext<DB>>, P>,
+    inner: mantle_revm::OpEvm<OpContext<DB>, I, EthInstructions<EthInterpreter, OpContext<DB>>, P>,
     inspect: bool,
 }
 
@@ -60,9 +60,14 @@ impl<DB: Database, I, P> OpEvm<DB, I, P> {
     /// Creates a new OP EVM instance.
     ///
     /// The `inspect` argument determines whether the configured [`Inspector`] of the given
-    /// [`OpEvm`](op_revm::OpEvm) should be invoked on [`Evm::transact`].
+    /// [`OpEvm`] mantle_revm::OpEvm) should be invoked on [`Evm::transact`].
     pub const fn new(
-        evm: op_revm::OpEvm<OpContext<DB>, I, EthInstructions<EthInterpreter, OpContext<DB>>, P>,
+        evm: mantle_revm::OpEvm<
+            OpContext<DB>,
+            I,
+            EthInstructions<EthInterpreter, OpContext<DB>>,
+            P,
+        >,
         inspect: bool,
     ) -> Self {
         Self { inner: evm, inspect }
@@ -209,6 +214,10 @@ where
 
     fn inspector_mut(&mut self) -> &mut Self::Inspector {
         &mut self.inner.0.inspector
+    }
+
+    fn token_ratio(&self) -> U256 {
+        self.chain.get_token_ratio()
     }
 }
 
