@@ -100,16 +100,16 @@ where
             self.spec.is_spurious_dragon_active_at_block(self.evm.block().number);
         self.evm.db_mut().set_state_clear_flag(state_clear_flag);
 
-        self.system_caller.apply_blockhashes_contract_call(self.ctx.parent_hash, &mut self.evm)?;
-        self.system_caller
-            .apply_beacon_root_contract_call(self.ctx.parent_beacon_block_root, &mut self.evm)?;
+        // self.system_caller.apply_blockhashes_contract_call(self.ctx.parent_hash, &mut self.evm)?;
+        // self.system_caller
+        //     .apply_beacon_root_contract_call(self.ctx.parent_beacon_block_root, &mut self.evm)?;
 
-        // Ensure that the create2deployer is force-deployed at the canyon transition. Optimism
-        // blocks will always have at least a single transaction in them (the L1 info transaction),
-        // so we can safely assume that this will always be triggered upon the transition and that
-        // the above check for empty blocks will never be hit on OP chains.
-        ensure_create2_deployer(&self.spec, self.evm.block().timestamp, self.evm.db_mut())
-            .map_err(BlockExecutionError::other)?;
+        // // Ensure that the create2deployer is force-deployed at the canyon transition. Optimism
+        // // blocks will always have at least a single transaction in them (the L1 info transaction),
+        // // so we can safely assume that this will always be triggered upon the transition and that
+        // // the above check for empty blocks will never be hit on OP chains.
+        // ensure_create2_deployer(&self.spec, self.evm.block().timestamp, self.evm.db_mut())
+        //     .map_err(BlockExecutionError::other)?;
 
         Ok(())
     }
@@ -191,9 +191,7 @@ where
                         // when set. The state transition process ensures
                         // this is only set for post-Canyon deposit
                         // transactions.
-                        deposit_receipt_version: (is_deposit
-                            && self.spec.is_canyon_active_at_timestamp(self.evm.block().timestamp))
-                        .then_some(1),
+                        deposit_receipt_version: None,
                         token_ratio: None,
                     })
                 }
