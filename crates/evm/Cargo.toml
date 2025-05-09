@@ -21,8 +21,7 @@ alloy-eips.workspace = true
 alloy-hardforks.workspace = true
 
 revm.workspace = true
-# op-revm = { workspace = true, optional = true }
-mantle-revm = { workspace = true, optional = true }
+op-revm = { workspace = true, optional = true }
 op-alloy-consensus = { workspace = true, optional = true }
 
 auto_impl.workspace = true
@@ -52,4 +51,4 @@ std = [
     "thiserror/std",
     "op-alloy-consensus?/std"
 ]
-op = ["mantle-revm", "op-alloy-consensus"]
+op = ["op-revm", "op-alloy-consensus"]

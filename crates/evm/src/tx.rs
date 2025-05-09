@@ -353,7 +353,7 @@ mod op {
     use alloy_eips::{Encodable2718, Typed2718};
     use alloy_primitives::{Address, Bytes};
     use op_alloy_consensus::{OpTxEnvelope, TxDeposit};
-    use mantle_revm::{transaction::deposit::DepositTransactionParts, OpTransaction};
+    use op_revm::{transaction::deposit::DepositTransactionParts, OpTransaction};
     use revm::context::TxEnv;
 
     impl FromTxWithEncoded<OpTxEnvelope> for OpTransaction<TxEnv> {
