@@ -41,15 +41,15 @@ alloy-op-evm = { version = "0.7.0", path = "crates/op-evm", default-features = f
 # alloy
 alloy-eip2124 = { version = "0.2", default-features = false }
 alloy-chains = { version = "0.2.0", default-features = false }
-alloy-eips = { version = "0.14", default-features = false }
-alloy-consensus = { version = "0.14", default-features = false }
+alloy-eips = { version = "0.15", default-features = false }
+alloy-consensus = { version = "0.15", default-features = false }
 alloy-primitives = { version = "1.0.0", default-features = false }
 alloy-sol-types = { version = "1.0.0", default-features = false }
 alloy-hardforks = { version = "0.2" }
 
 # op-alloy
 alloy-op-hardforks = { version = "0.2" }
-op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", branch = "v141", default-features = false }
+op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", branch = "v151", default-features = false }
 
 # revm
 revm = { git = "https://github.com/mantle-xyz/revm", branch = "v69_op", default-features = false }
