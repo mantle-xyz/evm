@@ -106,7 +106,6 @@ where
     type Error = EVMError<DB::Error, OpTransactionError>;
     type HaltReason = OpHaltReason;
     type Spec = OpSpecId;
-    type Precompiles = P;
 
     fn block(&self) -> &BlockEnv {
         &self.block
@@ -212,10 +211,6 @@ where
         self.inspect = enabled;
     }
 
-    fn precompiles_mut(&mut self) -> &mut Self::Precompiles {
-        &mut self.inner.0.precompiles
-    }
-
     fn token_ratio(&self) -> U256 {
         self.chain.get_token_ratio()
     }
@@ -227,14 +222,13 @@ where
 pub struct OpEvmFactory;
 
 impl EvmFactory for OpEvmFactory {
-    type Evm<DB: Database, I: Inspector<OpContext<DB>>> = OpEvm<DB, I, Self::Precompiles>;
+    type Evm<DB: Database, I: Inspector<OpContext<DB>>> = OpEvm<DB, I>;
     type Context<DB: Database> = OpContext<DB>;
     type Tx = OpTransaction<TxEnv>;
     type Error<DBError: core::error::Error + Send + Sync + 'static> =
         EVMError<DBError, OpTransactionError>;
     type HaltReason = OpHaltReason;
     type Spec = OpSpecId;
-    type Precompiles = OpPrecompiles;
 
     fn create_evm<DB: Database>(
         &self,
