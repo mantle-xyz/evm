@@ -21,7 +21,7 @@ impl IntoTxEnv<Self> for TxEnv {
 }
 
 #[cfg(feature = "op")]
-impl<T: revm::context::Transaction> IntoTxEnv<Self> for mantle_revm::OpTransaction<T> {
+impl<T: revm::context::Transaction> IntoTxEnv<Self> for op_revm::OpTransaction<T> {
     fn into_tx_env(self) -> Self {
         self
     }
@@ -333,7 +333,7 @@ mod op {
     use alloy_eips::{Encodable2718, Typed2718};
     use alloy_primitives::{Address, Bytes};
     use op_alloy_consensus::{OpTxEnvelope, TxDeposit};
-    use mantle_revm::{transaction::deposit::DepositTransactionParts, OpTransaction};
+    use op_revm::{transaction::deposit::DepositTransactionParts, OpTransaction};
     use revm::context::TxEnv;
 
     impl FromTxWithEncoded<OpTxEnvelope> for OpTransaction<TxEnv> {

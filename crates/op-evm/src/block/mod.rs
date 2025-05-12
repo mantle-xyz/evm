@@ -17,7 +17,7 @@ use alloy_evm::{
 use alloy_op_hardforks::{OpChainHardforks, OpHardforks};
 use alloy_primitives::{Bytes, B256};
 use canyon::ensure_create2_deployer;
-use mantle_revm::transaction::deposit::DEPOSIT_TRANSACTION_TYPE;
+use op_revm::transaction::deposit::DEPOSIT_TRANSACTION_TYPE;
 use op_alloy_consensus::OpDepositReceipt;
 pub use receipt_builder::OpAlloyReceiptBuilder;
 use receipt_builder::OpReceiptBuilder;
