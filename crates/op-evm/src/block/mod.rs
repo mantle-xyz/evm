@@ -164,7 +164,6 @@ where
         // append gas used
         self.gas_used += gas_used;
 
-        // [TODO]: token ratio should be added to the receipt,but not deposit receipt
         self.receipts.push(
             match self.receipt_builder.build_receipt(ReceiptBuilderCtx {
                 tx: tx.tx(),
@@ -192,7 +191,6 @@ where
                         // this is only set for post-Canyon deposit
                         // transactions.
                         deposit_receipt_version: None,
-                        token_ratio: None,
                     })
                 }
             },
