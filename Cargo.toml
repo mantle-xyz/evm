@@ -45,10 +45,10 @@ alloy-eips = { version = "0.15", default-features = false }
 alloy-consensus = { version = "0.15", default-features = false }
 alloy-primitives = { version = "1.0.0", default-features = false }
 alloy-sol-types = { version = "1.0.0", default-features = false }
-alloy-hardforks = { version = "0.2" }
+alloy-hardforks = { git = "https://github.com/byteflyfunny/hardforks", branch = "feature/operator-fee", default-features = false }
 
 # op-alloy
-alloy-op-hardforks = { version = "0.2" }
+alloy-op-hardforks = { git = "https://github.com/byteflyfunny/hardforks", branch = "feature/operator-fee", default-features = false }
 op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", branch = "v151", default-features = false }
 
 # revm
