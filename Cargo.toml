@@ -52,8 +52,8 @@ alloy-op-hardforks = { version = "0.2" }
 op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", branch = "fix-rlp", default-features = false }
 
 # revm
-revm = { git = "https://github.com/mantle-xyz/revm", branch = "v69_mantle", default-features = false }
-op-revm = { git = "https://github.com/mantle-xyz/revm", branch = "v69_mantle", default-features = false }
+revm = { git = "https://github.com/mantle-xyz/revm", branch = "v69_mantle_debug", default-features = false }
+op-revm = { git = "https://github.com/mantle-xyz/revm", branch = "v69_mantle_debug", default-features = false }
 
 
 # Tracing
