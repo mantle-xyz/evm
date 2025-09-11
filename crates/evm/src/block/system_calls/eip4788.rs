@@ -1,5 +1,7 @@
 //! [EIP-4788](https://eips.ethereum.org/EIPS/eip-4788) system call implementation.
 
+use core::f32::consts::E;
+
 use crate::{
     block::{BlockExecutionError, BlockValidationError},
     Evm,
@@ -8,7 +10,8 @@ use alloc::{boxed::Box, string::ToString};
 use alloy_eips::eip4788::BEACON_ROOTS_ADDRESS;
 use alloy_hardforks::EthereumHardforks;
 use alloy_primitives::B256;
-use revm::context_interface::result::ResultAndState;
+use op_revm::OpHaltReason;
+use revm::{bytecode::eof::printer::print, context_interface::result::ResultAndState};
 
 /// Applies the pre-block call to the [EIP-4788] beacon block root contract, using the given block,
 /// chain spec, EVM.
@@ -25,6 +28,7 @@ pub(crate) fn transact_beacon_root_contract_call<Halt>(
     parent_beacon_block_root: Option<B256>,
     evm: &mut impl Evm<HaltReason = Halt>,
 ) -> Result<Option<ResultAndState<Halt>>, BlockExecutionError> {
+    tracing::info!("transact_beacon_root_contract_call: {} {} {}", spec.is_cancun_active_at_timestamp(evm.block().timestamp), evm.block().timestamp, evm.block().number);
     if !spec.is_cancun_active_at_timestamp(evm.block().timestamp) {
         return Ok(None);
     }
@@ -43,14 +47,41 @@ pub(crate) fn transact_beacon_root_contract_call<Halt>(
         }
         return Ok(None);
     }
-
-    let res = match evm.transact_system_call(
+    use alloy_primitives::hex;
+    tracing::info!("transact_system_call: {} 0x{}", BEACON_ROOTS_ADDRESS, hex::encode(parent_beacon_block_root.0));
+    let res: ResultAndState<Halt> = match evm.transact_system_call(
         alloy_eips::eip4788::SYSTEM_ADDRESS,
         BEACON_ROOTS_ADDRESS,
         parent_beacon_block_root.0.into(),
     ) {
-        Ok(res) => res,
+        Ok(res) => {
+            tracing::info!("transact_beacon_root_contract_call result ok, success: {:?}", res.result.is_success());
+            // 分别打印 result 和 state
+            use crate::block::ExecutionResult;
+            match &res.result {
+                ExecutionResult::Success { reason, gas_used, gas_refunded, logs, output } => {
+                    tracing::info!("res.result.Success: {:?} {:?} {:?} {:?} {:?}", reason, gas_used, gas_refunded, logs, output);
+                }
+                ExecutionResult::Revert { gas_used, output } => {
+                    tracing::info!("res.result.Revert: {} {}", gas_used, output);
+                }
+                ExecutionResult::Halt { reason, gas_used, .. } => {
+                    use op_revm::OpHaltReason;
+                    let op_reason = unsafe { std::mem::transmute::<&Halt, &OpHaltReason>(reason) };
+                    tracing::info!("res.result.Halt: {:?} {:?}", gas_used, op_reason);
+                }
+            }
+            tracing::info!("res.state (EvmState) 包含 {} 个账户:", res.state.len());
+            
+            // 详细打印每个账户信息
+            for (address, account) in &res.state {
+                tracing::info!("  地址: {:?}", address);
+                tracing::info!("  账户信息: {:?}", account);
+            }
+            res
+        },
         Err(e) => {
+            tracing::info!("transact_system_call result err: {:?}", e);
             return Err(BlockValidationError::BeaconRootContractCall {
                 parent_beacon_block_root: Box::new(parent_beacon_block_root),
                 message: e.to_string(),
