@@ -49,7 +49,7 @@ alloy-hardforks = { version = "0.2" }
 
 # op-alloy
 alloy-op-hardforks = { version = "0.2" }
-op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.0.0", default-features = false }
+op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.0.1", default-features = false }
 
 # revm
 revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.0.0", default-features = false }
@@ -69,3 +69,5 @@ serde = { version = "1", default-features = false, features = ["derive"] }
 thiserror = { version = "2.0.0", default-features = false }
 serde_json = "1"
 
+# [patch.crates-io]
+# op-alloy-consensus = { path = "/Users/sh001/Documents/codes/op-reth/op-alloy/crates/consensus", default-features = false }
