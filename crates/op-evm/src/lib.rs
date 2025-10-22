@@ -12,7 +12,7 @@ extern crate alloc;
 pub use alloy_evm::op::{spec, spec_by_timestamp_after_bedrock};
 
 use alloy_evm::{precompiles::PrecompilesMap, Database, Evm, EvmEnv, EvmFactory};
-use alloy_primitives::{Address, Bytes};
+use alloy_primitives::{Address, Bytes, U256};
 use core::{
     fmt::Debug,
     ops::{Deref, DerefMut},
@@ -21,7 +21,6 @@ use op_revm::{
     precompiles::OpPrecompiles, DefaultOp, OpBuilder, OpContext, OpHaltReason, OpSpecId,
     OpTransaction, OpTransactionError,
 };
-use op_alloy_consensus::OpTxType;
 use revm::{
     context::{BlockEnv, TxEnv},
     context_interface::result::{EVMError, ResultAndState},
