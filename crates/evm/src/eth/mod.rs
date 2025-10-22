@@ -258,6 +258,10 @@ where
             &mut self.inner.precompiles,
         )
     }
+    
+    fn token_ratio(&self) -> U256 {
+        U256::ZERO
+    }
 }
 
 /// Factory producing [`EthEvm`].
