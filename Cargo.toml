@@ -3,9 +3,9 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
-version = "0.7.0"
+version = "0.22.6"
 edition = "2021"
-rust-version = "1.85"
+rust-version = "1.88"
 authors = ["Alloy Contributors"]
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/alloy-rs/alloy-evm"
@@ -25,9 +25,9 @@ unnameable-types = "warn"
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }
-missing-const-for-fn = "allow" # TODO: https://github.com/rust-lang/rust-clippy/issues/14020
+missing-const-for-fn = "warn"
 use-self = "warn"
-option-if-let-else = "warn"
+option-if-let-else = "allow"
 redundant-clone = "warn"
 
 [workspace.metadata.docs.rs]
@@ -35,31 +35,28 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [workspace.dependencies]
-alloy-evm = { version = "0.7.0", path = "crates/evm", default-features = false }
-alloy-op-evm = { version = "0.7.0", path = "crates/op-evm", default-features = false }
+alloy-evm = { version = "0.22.6", path = "crates/evm", default-features = false }
+alloy-op-evm = { version = "0.22.6", path = "crates/op-evm", default-features = false }
 
 # alloy
 alloy-eip2124 = { version = "0.2", default-features = false }
 alloy-chains = { version = "0.2.0", default-features = false }
-alloy-eips = { version = "0.15", default-features = false }
-alloy-consensus = { version = "0.15", default-features = false }
+alloy-eips = { version = "1.0.34", default-features = false }
+alloy-consensus = { version = "1.0.27", default-features = false }
 alloy-primitives = { version = "1.0.0", default-features = false }
 alloy-sol-types = { version = "1.0.0", default-features = false }
-alloy-hardforks = { version = "0.2" }
+alloy-hardforks = { version = "0.4.2" }
+alloy-rpc-types-eth = { version = "1.0.27", default-features = false }
+alloy-rpc-types-engine = { version = "1.0.27", default-features = false }
 
-# op-alloy
-alloy-op-hardforks = { version = "0.2" }
-op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.0.1", default-features = false }
+
+alloy-op-hardforks = { version = "0.4.2" }
+op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.1.0", default-features = false }
+op-alloy-rpc-types-engine = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.1.0", default-features = false }
 
 # revm
-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.0.0", default-features = false }
-op-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.0.0", default-features = false }
-
-
-# Tracing
-tracing-loki = "0.2.6"
-tracing-subscriber = "0.3.19"
-tracing = { version = "0.1.41", default-features = false }
+revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.1.0", default-features = false }
+op-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.1.0", default-features = false }
 
 
 # misc
@@ -68,6 +65,11 @@ derive_more = { version = "2", default-features = false, features = ["full"] }
 serde = { version = "1", default-features = false, features = ["derive"] }
 thiserror = { version = "2.0.0", default-features = false }
 serde_json = "1"
+test-case = "3"
 
-# [patch.crates-io]
-# op-alloy-consensus = { path = "/Users/sh001/Documents/codes/op-reth/op-alloy/crates/consensus", default-features = false }
+[patch.crates-io]
+# revm = { git = "https://github.com/bluealloy/revm", rev = "11b16259" }
+# op-revm = { git = "https://github.com/bluealloy/revm", rev = "11b16259" }
+
+#alloy-hardforks = { git = "https://github.com/alloy-rs/hardforks", rev = "0fd230f5aa24c4f6a8c593918b7449df0c20f60a" }
+#alloy-op-hardforks = { git = "https://github.com/alloy-rs/hardforks", rev = "0fd230f5aa24c4f6a8c593918b7449df0c20f60a" }

@@ -1,8 +1,11 @@
 //! Ethereum EVM implementation.
 
+pub use env::NextEvmEnvAttributes;
+
+pub(crate) use env::EvmEnvInput;
+
 use crate::{env::EvmEnv, evm::EvmFactory, precompiles::PrecompilesMap, Database, Evm};
-use alloc::vec::Vec;
-use alloy_primitives::{Address, Bytes, TxKind, U256};
+use alloy_primitives::{Address, Bytes, U256};
 use core::{
     fmt::Debug,
     ops::{Deref, DerefMut},
@@ -10,12 +13,12 @@ use core::{
 use revm::{
     context::{BlockEnv, CfgEnv, Evm as RevmEvm, TxEnv},
     context_interface::result::{EVMError, HaltReason, ResultAndState},
-    handler::{instructions::EthInstructions, EthPrecompiles, PrecompileProvider},
+    handler::{instructions::EthInstructions, EthFrame, EthPrecompiles, PrecompileProvider},
     inspector::NoOpInspector,
     interpreter::{interpreter::EthInterpreter, InterpreterResult},
     precompile::{PrecompileSpecId, Precompiles},
     primitives::hardfork::SpecId,
-    Context, ExecuteEvm, InspectEvm, Inspector, MainBuilder, MainContext,
+    Context, ExecuteEvm, InspectEvm, Inspector, MainBuilder, MainContext, SystemCallEvm,
 };
 
 mod block;
@@ -26,8 +29,95 @@ pub mod eip6110;
 pub mod receipt_builder;
 pub mod spec;
 
+mod env;
+pub(crate) mod spec_id;
+
 /// The Ethereum EVM context type.
 pub type EthEvmContext<DB> = Context<BlockEnv, TxEnv, CfgEnv, DB>;
+
+/// Helper builder to construct `EthEvm` instances in a unified way.
+#[derive(Debug)]
+pub struct EthEvmBuilder<DB: Database, I = NoOpInspector> {
+    db: DB,
+    block_env: BlockEnv,
+    cfg_env: CfgEnv,
+    inspector: I,
+    inspect: bool,
+    precompiles: Option<PrecompilesMap>,
+}
+
+impl<DB: Database> EthEvmBuilder<DB, NoOpInspector> {
+    /// Creates a builder from the provided `EvmEnv` and database.
+    pub const fn new(db: DB, env: EvmEnv) -> Self {
+        Self {
+            db,
+            block_env: env.block_env,
+            cfg_env: env.cfg_env,
+            inspector: NoOpInspector {},
+            inspect: false,
+            precompiles: None,
+        }
+    }
+}
+
+impl<DB: Database, I> EthEvmBuilder<DB, I> {
+    /// Sets a custom inspector
+    pub fn inspector<J>(self, inspector: J) -> EthEvmBuilder<DB, J> {
+        EthEvmBuilder {
+            db: self.db,
+            block_env: self.block_env,
+            cfg_env: self.cfg_env,
+            inspector,
+            inspect: self.inspect,
+            precompiles: self.precompiles,
+        }
+    }
+
+    /// Sets a custom inspector and enables invoking it during transaction execution.
+    pub fn activate_inspector<J>(self, inspector: J) -> EthEvmBuilder<DB, J> {
+        self.inspector(inspector).inspect()
+    }
+
+    /// Sets whether to invoke the inspector during transaction execution.
+    pub const fn set_inspect(mut self, inspect: bool) -> Self {
+        self.inspect = inspect;
+        self
+    }
+
+    /// Enables invoking the inspector during transaction execution.
+    pub const fn inspect(self) -> Self {
+        self.set_inspect(true)
+    }
+
+    /// Overrides the precompiles map. If not provided, it will be derived from the `SpecId` in
+    /// `CfgEnv`.
+    pub fn precompiles(mut self, precompiles: PrecompilesMap) -> Self {
+        self.precompiles = Some(precompiles);
+        self
+    }
+
+    /// Builds the `EthEvm` instance.
+    pub fn build(self) -> EthEvm<DB, I, PrecompilesMap>
+    where
+        I: Inspector<EthEvmContext<DB>>,
+    {
+        let precompiles = match self.precompiles {
+            Some(p) => p,
+            None => PrecompilesMap::from_static(Precompiles::new(PrecompileSpecId::from_spec_id(
+                self.cfg_env.spec,
+            ))),
+        };
+
+        let inner = Context::mainnet()
+            .with_block(self.block_env)
+            .with_cfg(self.cfg_env)
+            .with_db(self.db)
+            .build_mainnet_with_inspector(self.inspector)
+            .with_precompiles(precompiles);
+
+        EthEvm { inner, inspect: self.inspect }
+    }
+}
 
 /// Ethereum EVM implementation.
 ///
@@ -41,6 +131,7 @@ pub struct EthEvm<DB: Database, I, PRECOMPILE = EthPrecompiles> {
         I,
         EthInstructions<EthInterpreter, EthEvmContext<DB>>,
         PRECOMPILE,
+        EthFrame,
     >,
     inspect: bool,
 }
@@ -56,6 +147,7 @@ impl<DB: Database, I, PRECOMPILE> EthEvm<DB, I, PRECOMPILE> {
             I,
             EthInstructions<EthInterpreter, EthEvmContext<DB>>,
             PRECOMPILE,
+            EthFrame,
         >,
         inspect: bool,
     ) -> Self {
@@ -65,8 +157,13 @@ impl<DB: Database, I, PRECOMPILE> EthEvm<DB, I, PRECOMPILE> {
     /// Consumes self and return the inner EVM instance.
     pub fn into_inner(
         self,
-    ) -> RevmEvm<EthEvmContext<DB>, I, EthInstructions<EthInterpreter, EthEvmContext<DB>>, PRECOMPILE>
-    {
+    ) -> RevmEvm<
+        EthEvmContext<DB>,
+        I,
+        EthInstructions<EthInterpreter, EthEvmContext<DB>>,
+        PRECOMPILE,
+        EthFrame,
+    > {
         self.inner
     }
 
@@ -76,7 +173,7 @@ impl<DB: Database, I, PRECOMPILE> EthEvm<DB, I, PRECOMPILE> {
     }
 
     /// Provides a mutable reference to the EVM context.
-    pub fn ctx_mut(&mut self) -> &mut EthEvmContext<DB> {
+    pub const fn ctx_mut(&mut self) -> &mut EthEvmContext<DB> {
         &mut self.inner.ctx
     }
 }
@@ -108,6 +205,7 @@ where
     type Error = EVMError<DB::Error>;
     type HaltReason = HaltReason;
     type Spec = SpecId;
+    type BlockEnv = BlockEnv;
     type Precompiles = PRECOMPILE;
     type Inspector = I;
 
@@ -119,10 +217,12 @@ where
         self.cfg.chain_id
     }
 
-    fn transact_raw(&mut self, tx: Self::Tx) -> Result<ResultAndState, Self::Error> {
+    fn transact_raw(
+        &mut self,
+        tx: Self::Tx,
+    ) -> Result<ResultAndState<Self::HaltReason>, Self::Error> {
         if self.inspect {
-            self.inner.set_tx(tx);
-            self.inner.inspect_replay()
+            self.inner.inspect_tx(tx)
         } else {
             self.inner.transact(tx)
         }
@@ -133,66 +233,8 @@ where
         caller: Address,
         contract: Address,
         data: Bytes,
-    ) -> Result<ResultAndState, Self::Error> {
-        let tx = TxEnv {
-            caller,
-            kind: TxKind::Call(contract),
-            // Explicitly set nonce to 0 so revm does not do any nonce checks
-            nonce: 0,
-            gas_limit: 30_000_000,
-            value: U256::ZERO,
-            data,
-            // Setting the gas price to zero enforces that no value is transferred as part of the
-            // call, and that the call will not count against the block's gas limit
-            gas_price: 0,
-            // The chain ID check is not relevant here and is disabled if set to None
-            chain_id: None,
-            // Setting the gas priority fee to None ensures the effective gas price is derived from
-            // the `gas_price` field, which we need to be zero
-            gas_priority_fee: None,
-            access_list: Default::default(),
-            // blob fields can be None for this tx
-            blob_hashes: Vec::new(),
-            max_fee_per_blob_gas: 0,
-            tx_type: 0,
-            authorization_list: Default::default(),
-        };
-
-        let mut gas_limit = tx.gas_limit;
-        let mut basefee = 0;
-        let mut disable_nonce_check = true;
-
-        // ensure the block gas limit is >= the tx
-        core::mem::swap(&mut self.block.gas_limit, &mut gas_limit);
-        // disable the base fee check for this call by setting the base fee to zero
-        core::mem::swap(&mut self.block.basefee, &mut basefee);
-        // disable the nonce check
-        core::mem::swap(&mut self.cfg.disable_nonce_check, &mut disable_nonce_check);
-
-        let mut res = self.transact(tx);
-
-        // swap back to the previous gas limit
-        core::mem::swap(&mut self.block.gas_limit, &mut gas_limit);
-        // swap back to the previous base fee
-        core::mem::swap(&mut self.block.basefee, &mut basefee);
-        // swap back to the previous nonce check flag
-        core::mem::swap(&mut self.cfg.disable_nonce_check, &mut disable_nonce_check);
-
-        // NOTE: We assume that only the contract storage is modified. Revm currently marks the
-        // caller and block beneficiary accounts as "touched" when we do the above transact calls,
-        // and includes them in the result.
-        //
-        // We're doing this state cleanup to make sure that changeset only includes the changed
-        // contract storage.
-        if let Ok(res) = &mut res {
-            res.state.retain(|addr, _| *addr == contract);
-        }
-
-        res
-    }
-
-    fn db_mut(&mut self) -> &mut Self::DB {
-        &mut self.journaled_state.database
+    ) -> Result<ResultAndState<Self::HaltReason>, Self::Error> {
+        self.inner.system_call_with_caller(caller, contract, data)
     }
 
     fn finish(self) -> (Self::DB, EvmEnv<Self::Spec>) {
@@ -205,12 +247,16 @@ where
         self.inspect = enabled;
     }
 
-    fn precompiles_mut(&mut self) -> &mut Self::Precompiles {
-        &mut self.inner.precompiles
+    fn components(&self) -> (&Self::DB, &Self::Inspector, &Self::Precompiles) {
+        (&self.inner.ctx.journaled_state.database, &self.inner.inspector, &self.inner.precompiles)
     }
 
-    fn inspector_mut(&mut self) -> &mut Self::Inspector {
-        &mut self.inner.inspector
+    fn components_mut(&mut self) -> (&mut Self::DB, &mut Self::Inspector, &mut Self::Precompiles) {
+        (
+            &mut self.inner.ctx.journaled_state.database,
+            &mut self.inner.inspector,
+            &mut self.inner.precompiles,
+        )
     }
     
     fn token_ratio(&self) -> U256 {
@@ -230,21 +276,11 @@ impl EvmFactory for EthEvmFactory {
     type Error<DBError: core::error::Error + Send + Sync + 'static> = EVMError<DBError>;
     type HaltReason = HaltReason;
     type Spec = SpecId;
+    type BlockEnv = BlockEnv;
     type Precompiles = PrecompilesMap;
 
     fn create_evm<DB: Database>(&self, db: DB, input: EvmEnv) -> Self::Evm<DB, NoOpInspector> {
-        let spec_id = input.cfg_env.spec;
-        EthEvm {
-            inner: Context::mainnet()
-                .with_block(input.block_env)
-                .with_cfg(input.cfg_env)
-                .with_db(db)
-                .build_mainnet_with_inspector(NoOpInspector {})
-                .with_precompiles(PrecompilesMap::from_static(Precompiles::new(
-                    PrecompileSpecId::from_spec_id(spec_id),
-                ))),
-            inspect: false,
-        }
+        EthEvmBuilder::new(db, input).build()
     }
 
     fn create_evm_with_inspector<DB: Database, I: Inspector<Self::Context<DB>>>(
@@ -253,18 +289,7 @@ impl EvmFactory for EthEvmFactory {
         input: EvmEnv,
         inspector: I,
     ) -> Self::Evm<DB, I> {
-        let spec_id = input.cfg_env.spec;
-        EthEvm {
-            inner: Context::mainnet()
-                .with_block(input.block_env)
-                .with_cfg(input.cfg_env)
-                .with_db(db)
-                .build_mainnet_with_inspector(inspector)
-                .with_precompiles(PrecompilesMap::from_static(Precompiles::new(
-                    PrecompileSpecId::from_spec_id(spec_id),
-                ))),
-            inspect: true,
-        }
+        EthEvmBuilder::new(db, input).activate_inspector(inspector).build()
     }
 }
 
