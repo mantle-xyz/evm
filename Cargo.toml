@@ -51,13 +51,12 @@ alloy-rpc-types-engine = { version = "1.0.27", default-features = false }
 
 
 alloy-op-hardforks = { version = "0.4.2" }
-op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", branch = "v220", default-features = false }
-op-alloy-rpc-types-engine = { git = "https://github.com/mantle-xyz/op-alloy", branch = "v220", default-features = false }
+op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.1.0", default-features = false }
+op-alloy-rpc-types-engine = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.1.0", default-features = false }
 
 # revm
-# revm
-revm = { git = "https://github.com/mantle-xyz/revm", branch = "fusaka", default-features = false }
-op-revm = { git = "https://github.com/mantle-xyz/revm", branch = "fusaka", default-features = false }
+revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.1.0", default-features = false }
+op-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.1.0", default-features = false }
 
 
 # misc
