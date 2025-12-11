@@ -3,7 +3,7 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
-version = "0.22.6"
+version = "0.23.3"
 edition = "2021"
 rust-version = "1.88"
 authors = ["Alloy Contributors"]
@@ -35,8 +35,8 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [workspace.dependencies]
-alloy-evm = { version = "0.22.6", path = "crates/evm", default-features = false }
-alloy-op-evm = { version = "0.22.6", path = "crates/op-evm", default-features = false }
+alloy-evm = { version = "0.23.3", path = "crates/evm", default-features = false }
+alloy-op-evm = { version = "0.23.3", path = "crates/op-evm", default-features = false }
 
 # alloy
 alloy-eip2124 = { version = "0.2", default-features = false }
@@ -57,7 +57,8 @@ op-alloy-rpc-types-engine = { git = "https://github.com/mantle-xyz/op-alloy", ta
 # revm
 revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.1.1", default-features = false }
 op-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.1.1", default-features = false }
-
+# revm = { version = "31.0.0", default-features = false }
+# op-revm = { version = "12.0.0", default-features = false }
 
 # misc
 auto_impl = "1"
