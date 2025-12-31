@@ -6,7 +6,7 @@ pub use env::NextEvmEnvAttributes;
 pub(crate) use env::EvmEnvInput;
 
 use crate::{env::EvmEnv, evm::EvmFactory, precompiles::PrecompilesMap, Database, Evm};
-use alloy_primitives::{Address, Bytes};
+use alloy_primitives::{Address, Bytes, U256};
 use core::{
     fmt::Debug,
     ops::{Deref, DerefMut},
@@ -258,6 +258,10 @@ where
             &mut self.inner.inspector,
             &mut self.inner.precompiles,
         )
+    }
+    
+    fn token_ratio(&self) -> U256 {
+        U256::ZERO
     }
 }
 

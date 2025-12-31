@@ -32,6 +32,8 @@ impl FromRecoveredTx<TxDeposit> for TxEnv {
             from: _,
             mint: _,
             is_system_transaction: _,
+            eth_tx_value: _,
+            eth_value: _,
         } = tx;
         Self {
             tx_type: tx.ty(),
@@ -209,6 +211,8 @@ impl FromTxWithEncoded<TxDeposit> for OpTransaction<TxEnv> {
             source_hash: tx.source_hash,
             mint: Some(tx.mint),
             is_system_transaction: tx.is_system_transaction,
+            eth_value: Some(tx.eth_value),
+            eth_tx_value: tx.eth_tx_value,
         };
         Self { base, enveloped_tx: Some(encoded), deposit }
     }

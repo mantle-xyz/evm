@@ -1,6 +1,6 @@
 [package]
 name = "alloy-op-evm"
-description = "OP EVM implementation"
+description = "Optimism EVM implementation"
 
 version.workspace = true
 edition.workspace = true
