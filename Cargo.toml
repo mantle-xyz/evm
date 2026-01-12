@@ -50,7 +50,7 @@ alloy-rpc-types-eth = { version = "1.0.27", default-features = false }
 alloy-rpc-types-engine = { version = "1.0.27", default-features = false }
 
 alloy-op-hardforks = { version = "0.4.2" }
-op-alloy = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.1.0", default-features = false, features = [
+op-alloy = { git = "https://github.com/mantle-xyz/op-alloy", branch = "v230", default-features = false, features = [
     "consensus",
 ] }
 
