@@ -298,11 +298,9 @@ where
                         // when set. The state transition process ensures
                         // this is only set for post-Canyon deposit
                         // transactions.
-                        deposit_receipt_version: (is_deposit
-                            && self.spec.is_canyon_active_at_timestamp(
-                                self.evm.block().timestamp().saturating_to(),
-                            ))
-                        .then_some(1),
+
+                        // [MANTLE] always set to None for now
+                        deposit_receipt_version: None
                     })
                 }
             },
