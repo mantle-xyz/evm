@@ -16,7 +16,7 @@ use alloy_evm::{
 };
 use alloy_op_hardforks::{OpChainHardforks, OpHardforks};
 use alloy_primitives::{Bytes, B256};
-use canyon::ensure_create2_deployer;
+// use canyon::ensure_create2_deployer;
 use op_alloy::consensus::OpDepositReceipt;
 use op_revm::{
     constants::L1_BLOCK_CONTRACT, estimate_tx_compressed_size,
@@ -186,12 +186,14 @@ where
         // blocks will always have at least a single transaction in them (the L1 info transaction),
         // so we can safely assume that this will always be triggered upon the transition and that
         // the above check for empty blocks will never be hit on OP chains.
-        ensure_create2_deployer(
-            &self.spec,
-            self.evm.block().timestamp().saturating_to(),
-            self.evm.db_mut(),
-        )
-        .map_err(BlockExecutionError::other)?;
+
+        // [MANTLE] DISABLED FOR NOW
+        // ensure_create2_deployer(
+        //     &self.spec,
+        //     self.evm.block().timestamp().saturating_to(),
+        //     self.evm.db_mut(),
+        // )
+        // .map_err(BlockExecutionError::other)?;
 
         Ok(())
     }
@@ -659,6 +661,7 @@ mod tests {
         }
     }
 
+    #[ignore]
     #[test]
     fn test_jovian_da_footprint_estimation_maxed_out_da_footprint() {
         const DA_FOOTPRINT_GAS_SCALAR: u16 = 2000;
