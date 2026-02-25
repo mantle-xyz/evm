@@ -75,7 +75,7 @@ trait EvmInternalsTr: Database<Error = ErasedError> + Debug {
     /// Increments the nonce of the account.
     ///
     /// This creates a new journal entry with this change.
-    fn nonce_bump_journal_entry(&mut self, address: Address);
+    fn bump_nonce(&mut self, address: Address) -> Result<(), EvmInternalsError>;
 
     fn sload(
         &mut self,
@@ -169,8 +169,9 @@ where
         self.0.transfer(from, to, balance).map_err(EvmInternalsError::database)
     }
 
-    fn nonce_bump_journal_entry(&mut self, address: Address) {
-        self.0.nonce_bump_journal_entry(address);
+    fn bump_nonce(&mut self, address: Address) -> Result<(), EvmInternalsError> {
+        self.0.load_account_mut(address).map_err(EvmInternalsError::database)?.bump_nonce();
+        Ok(())
     }
 
     fn sload(
@@ -306,8 +307,8 @@ impl<'a> EvmInternals<'a> {
     /// Increments the nonce of the account.
     ///
     /// This creates a new journal entry with this change.
-    pub fn nonce_bump_journal_entry(&mut self, address: Address) {
-        self.internals.nonce_bump_journal_entry(address);
+    pub fn bump_nonce(&mut self, address: Address) -> Result<(), EvmInternalsError> {
+        self.internals.bump_nonce(address)
     }
 
     /// Loads a storage slot.

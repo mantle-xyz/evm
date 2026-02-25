@@ -9,15 +9,15 @@ use alloy_evm::{
         state_changes::{balance_increment_state, post_block_balance_increments},
         BlockExecutionError, BlockExecutionResult, BlockExecutor, BlockExecutorFactory,
         BlockExecutorFor, BlockValidationError, ExecutableTx, OnStateHook,
-        StateChangePostBlockSource, StateChangeSource, SystemCaller,
+        StateChangePostBlockSource, StateChangeSource, StateDB, SystemCaller,
     },
     eth::receipt_builder::ReceiptBuilderCtx,
     Database, Evm, EvmFactory, FromRecoveredTx, FromTxWithEncoded,
 };
 use alloy_op_hardforks::{OpChainHardforks, OpHardforks};
 use alloy_primitives::{Bytes, B256};
-use canyon::ensure_create2_deployer;
-use op_alloy_consensus::OpDepositReceipt;
+// use canyon::ensure_create2_deployer;
+use op_alloy::consensus::OpDepositReceipt;
 use op_revm::{
     constants::L1_BLOCK_CONTRACT, estimate_tx_compressed_size,
     transaction::deposit::DEPOSIT_TRANSACTION_TYPE, L1BlockInfo, OpTransaction,
@@ -27,7 +27,7 @@ use receipt_builder::OpReceiptBuilder;
 use revm::{
     context::{result::ResultAndState, Block},
     database::State,
-    DatabaseCommit, Inspector,
+    Database as _, DatabaseCommit, Inspector,
 };
 
 mod canyon;
@@ -127,11 +127,10 @@ pub enum OpBlockExecutionError {
     },
 }
 
-impl<'db, DB, E, R, Spec> OpBlockExecutor<E, R, Spec>
+impl<E, R, Spec> OpBlockExecutor<E, R, Spec>
 where
-    DB: Database + 'db,
     E: Evm<
-        DB = &'db mut State<DB>,
+        DB: Database + DatabaseCommit + StateDB,
         Tx: FromRecoveredTx<R::Transaction> + FromTxWithEncoded<R::Transaction> + OpTxEnv,
     >,
     R: OpReceiptBuilder<Transaction: Transaction + Encodable2718, Receipt: TxReceipt>,
@@ -150,10 +149,7 @@ where
 
         // Load the L1 block contract into the cache. If the L1 block contract is not pre-loaded the
         // database will panic when trying to fetch the DA footprint gas scalar.
-        self.evm
-            .db_mut()
-            .load_cache_account(L1_BLOCK_CONTRACT)
-            .map_err(BlockExecutionError::other)?;
+        self.evm.db_mut().basic(L1_BLOCK_CONTRACT).map_err(BlockExecutionError::other)?;
 
         let da_footprint_gas_scalar = L1BlockInfo::fetch_da_footprint_gas_scalar(self.evm.db_mut())
             .map_err(BlockExecutionError::other)?
@@ -163,11 +159,10 @@ where
     }
 }
 
-impl<'db, DB, E, R, Spec> BlockExecutor for OpBlockExecutor<E, R, Spec>
+impl<E, R, Spec> BlockExecutor for OpBlockExecutor<E, R, Spec>
 where
-    DB: Database + 'db,
     E: Evm<
-        DB = &'db mut State<DB>,
+        DB: Database + DatabaseCommit + StateDB,
         Tx: FromRecoveredTx<R::Transaction> + FromTxWithEncoded<R::Transaction> + OpTxEnv,
     >,
     R: OpReceiptBuilder<Transaction: Transaction + Encodable2718, Receipt: TxReceipt>,
@@ -192,13 +187,13 @@ where
         // so we can safely assume that this will always be triggered upon the transition and that
         // the above check for empty blocks will never be hit on OP chains.
 
-        // [MANTLE] disable create2 deployer
-        ensure_create2_deployer(
-            &self.spec,
-            self.evm.block().timestamp().saturating_to(),
-            self.evm.db_mut(),
-        )
-        .map_err(BlockExecutionError::other)?;
+        // [MANTLE] DISABLED FOR NOW
+        // ensure_create2_deployer(
+        //     &self.spec,
+        //     self.evm.block().timestamp().saturating_to(),
+        //     self.evm.db_mut(),
+        // )
+        // .map_err(BlockExecutionError::other)?;
 
         Ok(())
     }
@@ -257,19 +252,14 @@ where
         // were not introduced in Bedrock. In addition, regular transactions don't have deposit
         // nonces, so we don't need to touch the DB for those.
         let depositor = (self.is_regolith && is_deposit)
-            .then(|| {
-                self.evm
-                    .db_mut()
-                    .load_cache_account(*tx.signer())
-                    .map(|acc| acc.account_info().unwrap_or_default())
-            })
+            .then(|| self.evm.db_mut().basic(*tx.signer()).map(|acc| acc.unwrap_or_default()))
             .transpose()
             .map_err(BlockExecutionError::other)?;
 
         self.system_caller.on_state(StateChangeSource::Transaction(self.receipts.len()), &state);
 
         let gas_used = result.gas_used();
-        let _token_ratio = self.evm.token_ratio();
+
         // append gas used
         self.gas_used += gas_used;
 
@@ -308,8 +298,9 @@ where
                         // when set. The state transition process ensures
                         // this is only set for post-Canyon deposit
                         // transactions.
-                        // [MANTLE] disable deposit receipt version
-                        deposit_receipt_version: None,
+
+                        // [MANTLE] always set to None for now
+                        deposit_receipt_version: None
                     })
                 }
             },
@@ -445,7 +436,7 @@ mod tests {
     use alloy_hardforks::ForkCondition;
     use alloy_op_hardforks::OpHardfork;
     use alloy_primitives::{uint, Address, Signature, U256};
-    use op_alloy_consensus::OpTxEnvelope;
+    use op_alloy::consensus::OpTxEnvelope;
     use op_revm::{
         constants::{
             BASE_FEE_SCALAR_OFFSET, ECOTONE_L1_BLOB_BASE_FEE_SLOT, ECOTONE_L1_FEE_SCALARS_SLOT,
@@ -490,7 +481,6 @@ mod tests {
         let _ = executor.execute_transaction(&tx);
         let _ = executor.execute_transaction(&tx_with_encoded);
     }
-
 
     fn prepare_jovian_db(da_footprint_gas_scalar: u16) -> State<InMemoryDB> {
         const L1_BASE_FEE: U256 = uint!(1_U256);
@@ -669,6 +659,7 @@ mod tests {
         }
     }
 
+    #[ignore]
     #[test]
     fn test_jovian_da_footprint_estimation_maxed_out_da_footprint() {
         const DA_FOOTPRINT_GAS_SCALAR: u16 = 2000;

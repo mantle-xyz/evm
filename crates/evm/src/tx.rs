@@ -4,9 +4,10 @@
 //! into a unified transaction environment ([`TxEnv`]) that the EVM can execute. The main purpose
 //! of these traits is to enable flexible transaction input while maintaining type safety.
 
+use alloc::sync::Arc;
 use alloy_consensus::{
-    crypto::secp256k1, transaction::Recovered, EthereumTxEnvelope, TxEip1559, TxEip2930, TxEip4844,
-    TxEip7702, TxLegacy,
+    crypto::secp256k1, transaction::Recovered, EthereumTxEnvelope, Signed, TxEip1559, TxEip2930,
+    TxEip4844, TxEip4844Variant, TxEip7702, TxLegacy,
 };
 use alloy_eips::{
     eip2718::WithEncoded,
@@ -151,6 +152,12 @@ impl FromRecoveredTx<TxLegacy> for TxEnv {
     }
 }
 
+impl FromRecoveredTx<Signed<TxLegacy>> for TxEnv {
+    fn from_recovered_tx(tx: &Signed<TxLegacy>, sender: Address) -> Self {
+        Self::from_recovered_tx(tx.tx(), sender)
+    }
+}
+
 impl FromTxWithEncoded<TxLegacy> for TxEnv {
     fn from_encoded_tx(tx: &TxLegacy, sender: Address, _encoded: Bytes) -> Self {
         Self::from_recovered_tx(tx, sender)
@@ -173,6 +180,12 @@ impl FromRecoveredTx<TxEip2930> for TxEnv {
             access_list: access_list.clone(),
             ..Default::default()
         }
+    }
+}
+
+impl FromRecoveredTx<Signed<TxEip2930>> for TxEnv {
+    fn from_recovered_tx(tx: &Signed<TxEip2930>, sender: Address) -> Self {
+        Self::from_recovered_tx(tx.tx(), sender)
     }
 }
 
@@ -209,6 +222,12 @@ impl FromRecoveredTx<TxEip1559> for TxEnv {
             access_list: access_list.clone(),
             ..Default::default()
         }
+    }
+}
+
+impl FromRecoveredTx<Signed<TxEip1559>> for TxEnv {
+    fn from_recovered_tx(tx: &Signed<TxEip1559>, sender: Address) -> Self {
+        Self::from_recovered_tx(tx.tx(), sender)
     }
 }
 
@@ -252,8 +271,32 @@ impl FromRecoveredTx<TxEip4844> for TxEnv {
     }
 }
 
+impl FromRecoveredTx<Signed<TxEip4844>> for TxEnv {
+    fn from_recovered_tx(tx: &Signed<TxEip4844>, sender: Address) -> Self {
+        Self::from_recovered_tx(tx.tx(), sender)
+    }
+}
+
 impl FromTxWithEncoded<TxEip4844> for TxEnv {
     fn from_encoded_tx(tx: &TxEip4844, sender: Address, _encoded: Bytes) -> Self {
+        Self::from_recovered_tx(tx, sender)
+    }
+}
+
+impl<T> FromRecoveredTx<TxEip4844Variant<T>> for TxEnv {
+    fn from_recovered_tx(tx: &TxEip4844Variant<T>, sender: Address) -> Self {
+        Self::from_recovered_tx(tx.tx(), sender)
+    }
+}
+
+impl<T> FromRecoveredTx<Signed<TxEip4844Variant<T>>> for TxEnv {
+    fn from_recovered_tx(tx: &Signed<TxEip4844Variant<T>>, sender: Address) -> Self {
+        Self::from_recovered_tx(tx.tx(), sender)
+    }
+}
+
+impl<T> FromTxWithEncoded<TxEip4844Variant<T>> for TxEnv {
+    fn from_encoded_tx(tx: &TxEip4844Variant<T>, sender: Address, _encoded: Bytes) -> Self {
         Self::from_recovered_tx(tx, sender)
     }
 }
@@ -303,6 +346,12 @@ impl FromRecoveredTx<TxEip7702> for TxEnv {
     }
 }
 
+impl FromRecoveredTx<Signed<TxEip7702>> for TxEnv {
+    fn from_recovered_tx(tx: &Signed<TxEip7702>, sender: Address) -> Self {
+        Self::from_recovered_tx(tx.tx(), sender)
+    }
+}
+
 impl FromTxWithEncoded<TxEip7702> for TxEnv {
     fn from_encoded_tx(tx: &TxEip7702, sender: Address, _encoded: Bytes) -> Self {
         Self::from_recovered_tx(tx, sender)
@@ -324,6 +373,16 @@ pub trait RecoveredTx<T> {
 impl<T> RecoveredTx<T> for Recovered<&T> {
     fn tx(&self) -> &T {
         self.inner()
+    }
+
+    fn signer(&self) -> &Address {
+        self.signer_ref()
+    }
+}
+
+impl<T> RecoveredTx<T> for Recovered<Arc<T>> {
+    fn tx(&self) -> &T {
+        self.inner().as_ref()
     }
 
     fn signer(&self) -> &Address {

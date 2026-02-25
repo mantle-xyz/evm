@@ -3,7 +3,7 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
-version = "0.23.3"
+version = "0.25.2"
 edition = "2021"
 rust-version = "1.88"
 authors = ["Alloy Contributors"]
@@ -35,8 +35,8 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [workspace.dependencies]
-alloy-evm = { version = "0.23.3", path = "crates/evm", default-features = false }
-alloy-op-evm = { version = "0.23.3", path = "crates/op-evm", default-features = false }
+alloy-evm = { version = "0.25.2", path = "crates/evm", default-features = false }
+alloy-op-evm = { version = "0.25.2", path = "crates/op-evm", default-features = false }
 
 # alloy
 alloy-eip2124 = { version = "0.2", default-features = false }
@@ -51,18 +51,13 @@ alloy-rpc-types-engine = { version = "1.0.27", default-features = false }
 
 # op-alloy
 alloy-op-hardforks = { version = "0.4.2" }
-op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.1.0", default-features = false }
-op-alloy-rpc-types-engine = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.1.0", default-features = false }
-# op-alloy-consensus = { version = "0.22", default-features = false }
-# op-alloy-rpc-types-engine = { version = "0.22", default-features = false }
+op-alloy = { git = "https://github.com/mantle-xyz/op-alloy", branch = "v230", default-features = false, features = [
+    "consensus",
+] }
 
 # revm
-# revm = { version = "31.0.0", default-features = false }
-# op-revm = { version = "12.0.0", default-features = false }
-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.0-beta.1", default-features = false }
-op-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.0-beta.1", default-features = false }
-# revm = { path = "/Users/sh001/Documents/codes/op-reth/revm/crates/revm", default-features = false }
-# op-revm = { path = "/Users/sh001/Documents/codes/op-reth/revm/crates/op-revm", default-features = false }
+revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.0-beta.2", default-features = false }
+op-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.0-beta.2", default-features = false }
 
 # misc
 auto_impl = "1"

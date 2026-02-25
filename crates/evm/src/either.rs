@@ -1,5 +1,5 @@
 use crate::{Evm, EvmEnv};
-use alloy_primitives::{Address, Bytes, U256};
+use alloy_primitives::{Address, Bytes};
 use revm::context::either;
 
 impl<L, R> Evm for either::Either<L, R>
@@ -105,9 +105,5 @@ where
 
     fn components_mut(&mut self) -> (&mut Self::DB, &mut Self::Inspector, &mut Self::Precompiles) {
         either::for_both!(self, evm => evm.components_mut())
-    }
-
-    fn token_ratio(&self) -> U256 {
-        either::for_both!(self, evm => evm.token_ratio())
     }
 }

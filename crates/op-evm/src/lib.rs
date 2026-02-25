@@ -12,7 +12,7 @@ extern crate alloc;
 pub use alloy_evm::op::{spec, spec_by_timestamp_after_bedrock};
 
 use alloy_evm::{precompiles::PrecompilesMap, Database, Evm, EvmEnv, EvmFactory};
-use alloy_primitives::{Address, Bytes, U256};
+use alloy_primitives::{Address, Bytes};
 use core::{
     fmt::Debug,
     ops::{Deref, DerefMut},
@@ -153,10 +153,6 @@ where
             &mut self.inner.0.precompiles,
         )
     }
-
-    fn token_ratio(&self) -> U256 {
-        self.chain.token_ratio
-    }
 }
 
 /// Factory producing [`OpEvm`]s.
@@ -246,6 +242,7 @@ mod tests {
             gas: u64::MAX,
             caller: Address::ZERO,
             value: U256::ZERO,
+            is_static: false,
             target_address: Address::ZERO,
             bytecode_address: Address::ZERO,
             internals: EvmInternals::new(
@@ -263,6 +260,7 @@ mod tests {
             gas: u64::MAX,
             caller: Address::ZERO,
             value: U256::ZERO,
+            is_static: false,
             target_address: Address::ZERO,
             bytecode_address: Address::ZERO,
             internals: EvmInternals::new(
@@ -280,6 +278,7 @@ mod tests {
             gas: u64::MAX,
             caller: Address::ZERO,
             value: U256::ZERO,
+            is_static: false,
             target_address: Address::ZERO,
             bytecode_address: Address::ZERO,
             internals: EvmInternals::new(
@@ -297,6 +296,7 @@ mod tests {
             gas: u64::MAX,
             caller: Address::ZERO,
             value: U256::ZERO,
+            is_static: false,
             target_address: Address::ZERO,
             bytecode_address: Address::ZERO,
             internals: EvmInternals::new(
@@ -321,6 +321,7 @@ mod tests {
             gas: u64::MAX,
             caller: Address::ZERO,
             value: U256::ZERO,
+            is_static: false,
             target_address: Address::ZERO,
             bytecode_address: Address::ZERO,
             internals: EvmInternals::new(
@@ -337,6 +338,7 @@ mod tests {
             gas: u64::MAX,
             caller: Address::ZERO,
             value: U256::ZERO,
+            is_static: false,
             target_address: Address::ZERO,
             bytecode_address: Address::ZERO,
             internals: EvmInternals::new(
@@ -353,6 +355,7 @@ mod tests {
             gas: u64::MAX,
             caller: Address::ZERO,
             value: U256::ZERO,
+            is_static: false,
             target_address: Address::ZERO,
             bytecode_address: Address::ZERO,
             internals: EvmInternals::new(
@@ -369,6 +372,7 @@ mod tests {
             gas: u64::MAX,
             caller: Address::ZERO,
             value: U256::ZERO,
+            is_static: false,
             target_address: Address::ZERO,
             bytecode_address: Address::ZERO,
             internals: EvmInternals::new(
