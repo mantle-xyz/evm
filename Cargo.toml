@@ -67,9 +67,19 @@ thiserror = { version = "2.0.0", default-features = false }
 serde_json = "1"
 test-case = "3"
 
-[patch.crates-io]
-# revm = { git = "https://github.com/bluealloy/revm", rev = "11b16259" }
-# op-revm = { git = "https://github.com/bluealloy/revm", rev = "11b16259" }
+# [patch."https://github.com/mantle-xyz/revm"]
+# revm = { path = "../revm/crates/revm" }
+# revm-bytecode = { path = "../revm/crates/bytecode" }
+# revm-state = { path = "../revm/crates/state" }
+# revm-primitives = { path = "../revm/crates/primitives" }
+# revm-interpreter = { path = "../revm/crates/interpreter" }
+# revm-inspector = { path = "../revm/crates/inspector" }
+# revm-context = { path = "../revm/crates/context" }
+# revm-context-interface = { path = "../revm/crates/context/interface" }
+# revm-database = { path = "../revm/crates/database" }
+# revm-database-interface = { path = "../revm/crates/database/interface" }
+# op-revm = { path = "../revm/crates/op-revm" }
 
-#alloy-hardforks = { git = "https://github.com/alloy-rs/hardforks", rev = "0fd230f5aa24c4f6a8c593918b7449df0c20f60a" }
-#alloy-op-hardforks = { git = "https://github.com/alloy-rs/hardforks", rev = "0fd230f5aa24c4f6a8c593918b7449df0c20f60a" }
+# [patch."https://github.com/mantle-xyz/op-alloy"]
+# op-alloy = { path = "../op-alloy/crates/op-alloy" }
+# op-alloy-consensus = { path = "../op-alloy/crates/consensus" }
