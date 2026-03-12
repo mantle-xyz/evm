@@ -42,22 +42,22 @@ alloy-op-evm = { version = "0.25.2", path = "crates/op-evm", default-features = 
 alloy-eip2124 = { version = "0.2", default-features = false }
 alloy-chains = { version = "0.2.0", default-features = false }
 alloy-eips = { version = "1.0.34", default-features = false }
-alloy-consensus = { version = "1.0.27", default-features = false }
+alloy-consensus = { version = "1.1.2", default-features = false }
 alloy-primitives = { version = "1.0.0", default-features = false }
 alloy-sol-types = { version = "1.0.0", default-features = false }
 alloy-hardforks = { version = "0.4.2" }
-alloy-rpc-types-eth = { version = "1.0.27", default-features = false }
-alloy-rpc-types-engine = { version = "1.0.27", default-features = false }
+alloy-rpc-types-eth = { version = "1.1.2", default-features = false }
+alloy-rpc-types-engine = { version = "1.1.2", default-features = false }
 
 # op-alloy
 alloy-op-hardforks = { version = "0.4.2" }
-op-alloy = { git = "https://github.com/mantle-xyz/op-alloy", branch = "v230", default-features = false, features = [
+op-alloy = { git = "https://github.com/mantle-xyz/op-alloy", branch = "main", default-features = false, features = [
     "consensus",
 ] }
 
 # revm
-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.0-beta.3", default-features = false }
-op-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.0-beta.3", default-features = false }
+revm = { git = "https://github.com/mantle-xyz/revm", branch = "main", default-features = false }
+op-revm = { git = "https://github.com/mantle-xyz/revm", branch = "main", default-features = false }
 
 # misc
 auto_impl = "1"
