@@ -75,6 +75,7 @@ where
         random,
         base_fee,
         block_hash,
+        blob_base_fee: _,
     } = overrides;
 
     if let Some(block_hashes) = block_hash {

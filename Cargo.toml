@@ -3,7 +3,7 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
-version = "0.23.3"
+version = "0.25.2"
 edition = "2021"
 rust-version = "1.88"
 authors = ["Alloy Contributors"]
@@ -35,34 +35,29 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [workspace.dependencies]
-alloy-evm = { version = "0.23.3", path = "crates/evm", default-features = false }
-alloy-op-evm = { version = "0.23.3", path = "crates/op-evm", default-features = false }
+alloy-evm = { version = "0.25.2", path = "crates/evm", default-features = false }
+alloy-op-evm = { version = "0.25.2", path = "crates/op-evm", default-features = false }
 
 # alloy
 alloy-eip2124 = { version = "0.2", default-features = false }
 alloy-chains = { version = "0.2.0", default-features = false }
 alloy-eips = { version = "1.0.34", default-features = false }
-alloy-consensus = { version = "1.0.27", default-features = false }
+alloy-consensus = { version = "1.1.2", default-features = false }
 alloy-primitives = { version = "1.0.0", default-features = false }
 alloy-sol-types = { version = "1.0.0", default-features = false }
 alloy-hardforks = { version = "0.4.2" }
-alloy-rpc-types-eth = { version = "1.0.27", default-features = false }
-alloy-rpc-types-engine = { version = "1.0.27", default-features = false }
+alloy-rpc-types-eth = { version = "1.1.2", default-features = false }
+alloy-rpc-types-engine = { version = "1.1.2", default-features = false }
 
 # op-alloy
 alloy-op-hardforks = { version = "0.4.2" }
-op-alloy-consensus = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.1.0", default-features = false }
-op-alloy-rpc-types-engine = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.1.0", default-features = false }
-# op-alloy-consensus = { version = "0.22", default-features = false }
-# op-alloy-rpc-types-engine = { version = "0.22", default-features = false }
+op-alloy = { git = "https://github.com/mantle-xyz/op-alloy", branch = "main", default-features = false, features = [
+    "consensus",
+] }
 
 # revm
-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.0-alpha", default-features = false }
-op-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.0-alpha", default-features = false }
-# revm = { version = "31.0.0", default-features = false }
-# op-revm = { version = "12.0.0", default-features = false }
-# revm = { path = "/Users/sh001/Documents/codes/op-reth/revm/crates/revm", default-features = false }
-# op-revm = { path = "/Users/sh001/Documents/codes/op-reth/revm/crates/op-revm", default-features = false }
+revm = { git = "https://github.com/mantle-xyz/revm", branch = "main", default-features = false }
+op-revm = { git = "https://github.com/mantle-xyz/revm", branch = "main", default-features = false }
 
 # misc
 auto_impl = "1"
@@ -72,9 +67,19 @@ thiserror = { version = "2.0.0", default-features = false }
 serde_json = "1"
 test-case = "3"
 
-[patch.crates-io]
-# revm = { git = "https://github.com/bluealloy/revm", rev = "11b16259" }
-# op-revm = { git = "https://github.com/bluealloy/revm", rev = "11b16259" }
+# [patch."https://github.com/mantle-xyz/revm"]
+# revm = { path = "../revm/crates/revm" }
+# revm-bytecode = { path = "../revm/crates/bytecode" }
+# revm-state = { path = "../revm/crates/state" }
+# revm-primitives = { path = "../revm/crates/primitives" }
+# revm-interpreter = { path = "../revm/crates/interpreter" }
+# revm-inspector = { path = "../revm/crates/inspector" }
+# revm-context = { path = "../revm/crates/context" }
+# revm-context-interface = { path = "../revm/crates/context/interface" }
+# revm-database = { path = "../revm/crates/database" }
+# revm-database-interface = { path = "../revm/crates/database/interface" }
+# op-revm = { path = "../revm/crates/op-revm" }
 
-#alloy-hardforks = { git = "https://github.com/alloy-rs/hardforks", rev = "0fd230f5aa24c4f6a8c593918b7449df0c20f60a" }
-#alloy-op-hardforks = { git = "https://github.com/alloy-rs/hardforks", rev = "0fd230f5aa24c4f6a8c593918b7449df0c20f60a" }
+# [patch."https://github.com/mantle-xyz/op-alloy"]
+# op-alloy = { path = "../op-alloy/crates/op-alloy" }
+# op-alloy-consensus = { path = "../op-alloy/crates/consensus" }
