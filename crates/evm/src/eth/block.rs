@@ -21,7 +21,7 @@ use alloy_eips::{eip4895::Withdrawals, eip7685::Requests, Encodable2718};
 use alloy_hardforks::EthereumHardfork;
 use alloy_primitives::{Bytes, Log, B256};
 use revm::{
-    context::Block, context_interface::result::ResultAndState, database::State, DatabaseCommit,
+    context::Block, context_interface::result::{ExecutionResult, ResultAndState}, database::State, DatabaseCommit,
     Inspector,
 };
 
@@ -118,7 +118,9 @@ where
     ) -> Result<ResultAndState<<Self::Evm as Evm>::HaltReason>, BlockExecutionError> {
         // The sum of the transaction's gas limit, Tg, and the gas utilized in this block prior,
         // must be no greater than the block's gasLimit.
+        eprintln!("[DEBUG evm::eth::block] execute_transaction_without_commit gas_used={} gas_limit={}", self.gas_used, self.evm.block().gas_limit());
         let block_available_gas = self.evm.block().gas_limit() - self.gas_used;
+        eprintln!("[DEBUG evm::eth::block] execute_transaction_without_commit block_available_gas={}", block_available_gas);
 
         if tx.tx().gas_limit() > block_available_gas {
             return Err(BlockValidationError::TransactionGasLimitMoreThanAvailableBlockGas {
@@ -128,10 +130,23 @@ where
             .into());
         }
 
+        eprintln!("[DEBUG evm::eth::block] execute_transaction_without_commit tx.gas_limit={}", tx.tx().gas_limit());
         // Execute transaction and return the result
         self.evm.transact(&tx).map_err(|err| {
             let hash = tx.tx().trie_hash();
             BlockExecutionError::evm(err, hash)
+        })
+        .map(|output| {
+            if let ExecutionResult::Success { gas_used, gas_refunded, .. } = &output.result {
+                eprintln!("[DEBUG evm::eth::block] execute_transaction_without_commit Success gas_used={} gas_refunded={}", gas_used, gas_refunded);
+            }
+            if let ExecutionResult::Revert { gas_used, .. } = &output.result {
+                eprintln!("[DEBUG evm::eth::block] execute_transaction_without_commit Revert gas_used={}", gas_used);
+            }
+            if let ExecutionResult::Halt { gas_used, .. } = &output.result {
+                eprintln!("[DEBUG evm::eth::block] execute_transaction_without_commit Halt gas_used={}", gas_used);
+            }
+            output
         })
     }
 
@@ -145,6 +160,7 @@ where
         self.system_caller.on_state(StateChangeSource::Transaction(self.receipts.len()), &state);
 
         let gas_used = result.gas_used();
+        eprintln!("[DEBUG evm::eth::block::commit_transaction] gas_used={gas_used}");
 
         // append gas used
         self.gas_used += gas_used;

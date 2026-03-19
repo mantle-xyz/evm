@@ -223,8 +223,10 @@ where
         tx: Self::Tx,
     ) -> Result<ResultAndState<Self::HaltReason>, Self::Error> {
         if self.inspect {
+            eprintln!("[DEBUG evm::eth::transact_raw] inspect_tx");
             self.inner.inspect_tx(tx)
         } else {
+            eprintln!("[DEBUG evm::eth::transact_raw] transact");
             self.inner.transact(tx)
         }
     }

@@ -206,12 +206,16 @@ pub trait BlockExecutor {
     ) -> Result<Option<u64>, BlockExecutionError> {
         // Execute transaction without committing
         let output = self.execute_transaction_without_commit(&tx)?;
+        if let ExecutionResult::Success { gas_used, gas_refunded, .. } = &output.result {
+            eprintln!("[DEBUG evm::block::execute_transaction_with_commit_condition] gas_used={gas_used} refunded={gas_refunded}");
+        }
 
         if !f(&output.result).should_commit() {
             return Ok(None);
         }
 
         let gas_used = self.commit_transaction(output, tx)?;
+        eprintln!("[DEBUG evm::block::execute_transaction_with_commit_condition] gas_used={gas_used}");
         Ok(Some(gas_used))
     }
 
