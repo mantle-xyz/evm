@@ -51,13 +51,13 @@ alloy-rpc-types-engine = { version = "1.1.2", default-features = false }
 
 # op-alloy
 alloy-op-hardforks = { version = "0.4.2" }
-op-alloy = { git = "https://github.com/mantle-xyz/op-alloy", branch = "main", default-features = false, features = [
+op-alloy = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.2.0", default-features = false, features = [
     "consensus",
 ] }
 
 # revm
-revm = { git = "https://github.com/mantle-xyz/revm", branch = "main", default-features = false }
-op-revm = { git = "https://github.com/mantle-xyz/revm", branch = "main", default-features = false }
+revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.1", default-features = false }
+op-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.1", default-features = false }
 
 # misc
 auto_impl = "1"
