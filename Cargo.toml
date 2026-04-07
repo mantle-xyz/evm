@@ -56,8 +56,8 @@ op-alloy = { git = "https://github.com/mantle-xyz/op-alloy", tag = "v2.2.0", def
 ] }
 
 # revm
-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.1-beta", default-features = false }
-op-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.1-beta", default-features = false }
+revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.2", default-features = false }
+op-revm = { git = "https://github.com/mantle-xyz/revm", tag = "v2.2.2", default-features = false }
 
 # misc
 auto_impl = "1"
