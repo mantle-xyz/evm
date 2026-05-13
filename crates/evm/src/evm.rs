@@ -2,7 +2,7 @@
 
 use crate::{env::BlockEnvironment, tracing::TxTracer, EvmEnv, EvmError, IntoTxEnv};
 use alloy_consensus::transaction::TxHashRef;
-use alloy_primitives::{Address, Bytes, B256};
+use alloy_primitives::{Address, Bytes, B256, U256};
 use core::{error::Error, fmt::Debug, hash::Hash};
 use revm::{
     context::{result::ExecutionResult, CfgEnv},
@@ -189,6 +189,9 @@ pub trait Evm {
     fn inspector_mut(&mut self) -> &mut Self::Inspector {
         self.components_mut().1
     }
+
+    /// Returns the token ratio of the chain.
+    fn token_ratio(&self) -> U256;
 
     /// Provides immutable references to the database, inspector and precompiles.
     fn components(&self) -> (&Self::DB, &Self::Inspector, &Self::Precompiles);
